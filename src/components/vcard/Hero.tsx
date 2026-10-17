@@ -2,8 +2,6 @@ import { Building2 } from "lucide-react";
 import type { ResolvedCard } from "@/lib/card";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { ContactActions } from "./ContactActions";
-import { ModeToggle } from "./ModeToggle";
-import { ShareButton } from "./ShareButton";
 
 interface HeroProps {
   card: ResolvedCard;
@@ -34,7 +32,7 @@ function Initials({ initials }: { initials: string }) {
 }
 
 export function Hero({ card }: HeroProps) {
-  const { profile, seo } = card;
+  const { profile } = card;
 
   return (
     <header>
@@ -54,13 +52,6 @@ export function Hero({ card }: HeroProps) {
           <CoverPattern />
         )}
         <div aria-hidden className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/25 to-transparent" />
-        <div className="absolute inset-x-3 top-3 flex items-center justify-between sm:inset-x-4 sm:top-4">
-          <ModeToggle
-            initialMode={card.theme.defaultMode === "dark" ? "dark" : "light"}
-            themeColors={{ light: card.theme.surface, dark: card.theme.dark.surface }}
-          />
-          <ShareButton title={seo.title} text={profile.tagline ?? seo.description} />
-        </div>
       </div>
 
       {/* Identity */}

@@ -5,6 +5,7 @@ import { About } from "@/components/vcard/About";
 import { AdditionalLinks } from "@/components/vcard/AdditionalLinks";
 import { ContactDetails } from "@/components/vcard/ContactDetails";
 import { ContactExchangeSection } from "@/components/vcard/ContactExchangeSection";
+import { FloatingControls } from "@/components/vcard/FloatingControls";
 import { Footer } from "@/components/vcard/Footer";
 import { GallerySection } from "@/components/vcard/GallerySection";
 import { Hero } from "@/components/vcard/Hero";
@@ -27,6 +28,7 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(card)).replace(/</g, "\\u003c") }}
       />
+      <FloatingControls card={card} />
       <main className="mx-auto w-full max-w-xl sm:px-4 sm:pt-8 sm:pb-28 md:max-w-2xl md:pt-12">
         <div className="overflow-hidden bg-surface sm:rounded-[1.75rem] sm:border sm:border-line sm:shadow-card">
           <Hero card={card} />
