@@ -17,7 +17,7 @@ export function Location({ location }: { location: ResolvedCard["location"] }) {
               title={address ? `Map showing ${address}` : "Map"}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 size-full grayscale-[35%]"
+              className="absolute inset-0 size-full grayscale-[35%] dark:opacity-85"
             />
           </div>
         )}

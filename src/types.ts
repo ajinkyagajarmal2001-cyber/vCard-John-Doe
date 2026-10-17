@@ -186,6 +186,12 @@ export interface ThemeData {
    * "classic" – refined serif headings (lawyers, doctors, finance)
    */
   fontStyle?: Optional<"modern" | "classic">;
+  /**
+   * Colour mode for first-time visitors (they can switch with the Day/Night button):
+   * "light" (default), "dark", or "system" to follow the phone's setting.
+   * The night palette is generated automatically from `primary`.
+   */
+  defaultMode?: Optional<"light" | "dark" | "system">;
 }
 
 export interface SeoData {
@@ -203,8 +209,6 @@ export interface SeoData {
 }
 
 export interface FooterData {
-  /** Replaces the default "© <year> <company or name>" line. */
-  copyright?: Optional<string>;
   /** Small "Designed by …" credit link. */
   credit?: Optional<{ label: string; url?: Optional<string> }>;
 }

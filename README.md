@@ -21,6 +21,7 @@ COPY REPOSITORY  →  replace /public/images  →  edit src/data.ts  →  npm ru
 | Call · WhatsApp · Email · Website buttons | each one appears when its value is set |
 | **Save Contact** (downloads a `.vcf` with photo) | always |
 | Share button (native share sheet or copy link) | always |
+| Day/Night button (light ↔ dark mode, remembered per visitor) | always |
 | Contact details (with copy buttons) | phone, email or website is set |
 | About + highlight stats | `about.description` is set |
 | Services (with "Enquire on WhatsApp") | `services` has items |
@@ -31,6 +32,7 @@ COPY REPOSITORY  →  replace /public/images  →  edit src/data.ts  →  npm ru
 | Exchange contact (visitor sends their details) | `contactExchange.enabled` + WhatsApp or email set |
 | Links | `additionalLinks` has items |
 | Quick-action bar (sticky on scroll) | always; Call/WhatsApp icons only if set |
+| Agency credit (Kreative Den Media + phone) at the very bottom | set once in `src/branding.ts` |
 
 Generated automatically from `data.ts`: page title & description, Open Graph / X
 preview image, favicon and home-screen icon (initials + brand colour),
@@ -190,6 +192,19 @@ theme: {
 Text on brand-coloured buttons switches between white and dark automatically, and
 brand-coloured text is darkened if needed to stay readable. Remove `theme` entirely for the defaults.
 
+### Day / Night mode
+
+Every card has a Day/Night button on the cover. The night palette is generated
+automatically from `primary` (the brand colour is lightened so it stays readable on dark
+backgrounds), so no extra colours are needed. The visitor's choice is remembered on their
+device and applied before the page paints (no white flash).
+
+```ts
+theme: { defaultMode: "light" },   // what first-time visitors see: "light" (default) | "dark" | "system"
+```
+
+`"system"` follows the visitor's phone setting until they press the button.
+
 ## 12. SEO
 
 ```ts
@@ -201,7 +216,23 @@ variable in Vercel; that takes priority). It enables canonical URLs, absolute
 share-image links and the sitemap. Title defaults to *"Name | Designation"*, and the
 description defaults to the tagline. Both can be overridden with `seo.title` / `seo.description`.
 
-## 13. Deploy to Vercel
+## 13. Agency branding (Kreative Den Media)
+
+The credit at the very bottom of every card comes from **`src/branding.ts`**, not from
+`data.ts`, because it is the same for every client:
+
+```ts
+export const agencyBranding = {
+  name: "Kreative Den Media",
+  phone: "+91 9359314272",   // tap-to-call link
+  label: "Digital card by",
+};
+```
+
+Edit it once in the master template and every new client copy inherits it. To remove the
+credit from a particular card (e.g. a white-label client), set `name: ""` in that copy.
+
+## 14. Deploy to Vercel
 
 1. Push the client's repository to GitHub.
 2. In Vercel: **Add New → Project → Import** the repository. The defaults (Next.js, `npm run build`) are correct.
@@ -210,7 +241,7 @@ description defaults to the tagline. Both can be overridden with `seo.title` / `
 
 Every later push to the main branch redeploys automatically.
 
-## 14. Create a new client copy
+## 15. Create a new client copy
 
 ```bash
 # 1. Copy the template (GitHub "Use this template" works too)
@@ -236,6 +267,7 @@ URL parameters or shared storage, so one client's card can never expose another'
 ```
 src/
 ├── data.ts              ← CLIENT CHANGES THIS
+├── branding.ts          ← agency credit (same for every client)
 ├── types.ts             ← data model (never needs changing)
 ├── app/
 │   ├── layout.tsx       fonts, theme colours, metadata
@@ -250,7 +282,8 @@ src/
     ├── card.server.ts   build-time loader (drops missing image files)
     ├── validation.ts    hasValue, isValidUrl, isValidPhone, isValidEmail…
     ├── vcard.ts         .vcf generation
-    ├── whatsapp.ts, youtube.ts, social.ts, theme.ts, seo.ts, contact-exchange.ts
+    ├── theme.ts         day/night palettes + no-flash mode script
+    ├── whatsapp.ts, youtube.ts, social.ts, seo.ts, contact-exchange.ts
 ```
 
 ## Notes

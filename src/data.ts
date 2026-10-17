@@ -209,6 +209,7 @@ export const vCardData: VCardData = {
   theme: {
     primary: "#1E3A5F",
     fontStyle: "modern", // "modern" | "classic"
+    defaultMode: "light", // first visit: "light" | "dark" | "system" (visitors can switch Day/Night)
   },
 
   /* ------------------------------------------------------------------------
@@ -223,7 +224,6 @@ export const vCardData: VCardData = {
    * FOOTER [OPTIONAL]
    * --------------------------------------------------------------------- */
   footer: {
-    copyright: "",
     credit: null,
   },
 };

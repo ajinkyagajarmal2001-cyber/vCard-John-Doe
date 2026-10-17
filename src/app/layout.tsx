@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { card } from "@/lib/card.server";
 import { buildMetadata, buildViewport } from "@/lib/seo";
-import { themeToCssVars } from "@/lib/theme";
+import { modeBootScript, themeToCss } from "@/lib/theme";
 import "./globals.css";
 
 const sans = Inter({
@@ -28,9 +28,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       data-font={card.theme.fontStyle}
+      data-mode={card.theme.defaultMode === "dark" ? "dark" : "light"}
       className={`${sans.variable} ${serif.variable}`}
-      style={themeToCssVars(card.theme) as CSSProperties}
+      // The boot script below may switch data-mode before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: themeToCss(card.theme) }} />
+        <script dangerouslySetInnerHTML={{ __html: modeBootScript(card.theme) }} />
+      </head>
       <body className="min-h-dvh">
         <noscript>
           <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>

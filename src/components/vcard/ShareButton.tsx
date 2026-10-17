@@ -30,7 +30,7 @@ export function ShareButton({ title, text }: { title: string; text?: string }) {
     <button
       type="button"
       onClick={handleShare}
-      className="inline-flex h-10 items-center gap-2 rounded-full bg-white/90 px-4 text-[13px] font-medium text-ink shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white"
+      className="inline-flex h-10 items-center gap-2 rounded-full bg-surface/90 px-4 text-[13px] font-medium text-ink shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-surface"
     >
       {copied ? <Check className="size-4" aria-hidden /> : <Share2 className="size-4" aria-hidden />}
       <span>{copied ? "Link copied" : "Share"}</span>

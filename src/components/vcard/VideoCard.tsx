@@ -22,7 +22,7 @@ export function VideoCard({ video, featured, onPlay }: { video: VideoItem; featu
         <span
           aria-hidden
           className={cx(
-            "absolute inset-0 m-auto flex items-center justify-center rounded-full bg-white/95 text-brand-ink shadow-float transition-transform duration-200 group-hover:scale-105",
+            "absolute inset-0 m-auto flex items-center justify-center rounded-full bg-surface/95 text-brand-ink shadow-float transition-transform duration-200 group-hover:scale-105",
             featured ? "size-14" : "size-11",
           )}
         >

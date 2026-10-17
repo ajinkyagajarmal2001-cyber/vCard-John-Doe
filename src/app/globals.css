@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
+/* `dark:` utilities follow the Day/Night switch (data-mode on <html>). */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
 /*
  * Design tokens.
- * Raw colours (--brand, --ink, …) are injected on <html> from data.ts → theme
- * (see src/lib/theme.ts). The values below are only fallbacks.
+ * Raw colours (--brand, --ink, …) for day and night are generated from
+ * data.ts → theme (see src/lib/theme.ts). The values below are only fallbacks.
  */
 :root {
   --brand: #1e3a5f;
@@ -73,6 +76,15 @@
     @media (width >= 40rem) {
       background: var(--canvas);
     }
+  }
+
+  /* Tailwind resets buttons to the default arrow; every clickable control gets the hand cursor. */
+  a[href],
+  button:not(:disabled),
+  [role="button"],
+  label[for],
+  summary {
+    cursor: pointer;
   }
 
   :focus-visible {

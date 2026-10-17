@@ -54,7 +54,7 @@ export interface ResolvedCard {
   links: { title: string; url: string; description?: string; host: string }[];
   theme: ResolvedTheme;
   seo: { siteUrl?: string; title: string; description?: string; keywords: string[] };
-  footer: { copyright: string; credit?: { label: string; url?: string } };
+  footer: { credit?: { label: string; url?: string } };
 }
 
 export interface ResolveOptions {
@@ -233,7 +233,6 @@ export function resolveCard(data: VCardData, options: ResolveOptions = {}): Reso
 
   const creditLabel = cleanText(data.footer?.credit?.label);
   const footer = {
-    copyright: cleanText(data.footer?.copyright) ?? `© ${new Date().getFullYear()} ${profile.company ?? name}`,
     credit: creditLabel ? { label: creditLabel, url: normalizeUrl(data.footer?.credit?.url) } : undefined,
   };
 

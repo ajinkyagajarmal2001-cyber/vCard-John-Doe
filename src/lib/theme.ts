@@ -9,19 +9,44 @@ export const DEFAULT_THEME = {
   text: "#16191F",
   mutedText: "#5F6672",
   fontStyle: "modern",
+  defaultMode: "light",
 } as const;
+
+/** Neutral night palette; the brand colour is adapted to it automatically. */
+const NIGHT = {
+  background: "#0A0C10",
+  surface: "#13161C",
+  text: "#ECEEF2",
+  mutedText: "#9BA3AF",
+} as const;
+
+export type ColorMode = "light" | "dark";
+
+/** One complete set of colours (day or night). */
+export interface Palette {
+  brand: string;
+  /** Brand colour adjusted (if needed) to stay readable as text on the surface. */
+  brandInk: string;
+  /** Text colour that is readable on top of a brand-filled button. */
+  onBrand: string;
+  canvas: string;
+  surface: string;
+  ink: string;
+  muted: string;
+}
 
 export interface ResolvedTheme {
   primary: string;
-  /** Primary adjusted (if needed) to stay readable as text on the surface. */
   primaryInk: string;
-  /** Text colour that is readable on top of a primary-filled button. */
   onPrimary: string;
   background: string;
   surface: string;
   text: string;
   mutedText: string;
   fontStyle: "modern" | "classic";
+  /** Mode shown to first-time visitors ("system" follows the phone's setting). */
+  defaultMode: ColorMode | "system";
+  dark: Palette;
 }
 
 type Rgb = [number, number, number];
@@ -48,13 +73,24 @@ function contrast(a: Rgb, b: Rgb): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Darkens `color` towards black until it reaches `ratio` contrast against `against`. */
+/**
+ * Moves `color` away from `against` (darker on light backgrounds, lighter on
+ * dark ones) until it reaches `ratio` contrast.
+ */
 function ensureContrast(color: Rgb, against: Rgb, ratio: number): Rgb {
+  const lighten = luminance(against) < 0.2;
   let current = color;
-  for (let step = 0; step < 20 && contrast(current, against) < ratio; step++) {
-    current = current.map((c) => c * 0.9) as Rgb;
+  for (let step = 0; step < 24 && contrast(current, against) < ratio; step++) {
+    current = current.map((c) => (lighten ? c + (255 - c) * 0.12 : c * 0.9)) as Rgb;
   }
   return current;
+}
+
+/** White or near-black, whichever reads better on `fill`. */
+function readableOn(fill: Rgb): string {
+  const white: Rgb = [255, 255, 255];
+  const ink: Rgb = [17, 24, 39];
+  return contrast(fill, white) >= contrast(fill, ink) ? "#FFFFFF" : toHex(ink);
 }
 
 const pick = (value: unknown, fallback: string) => (parseHex(value) ? toHex(parseHex(value)!) : fallback);
@@ -63,31 +99,69 @@ export function resolveTheme(theme: ThemeData | null | undefined): ResolvedTheme
   const primary = pick(theme?.primary, DEFAULT_THEME.primary);
   const surface = pick(theme?.surface, DEFAULT_THEME.surface);
   const primaryRgb = parseHex(primary)!;
-  const surfaceRgb = parseHex(surface)!;
-  const white: Rgb = [255, 255, 255];
-  const ink: Rgb = [17, 24, 39];
+  const nightSurface = parseHex(NIGHT.surface)!;
+  // Keep brand-filled buttons distinguishable from the dark surface.
+  const nightBrand = ensureContrast(primaryRgb, nightSurface, 2);
+  const mode = theme?.defaultMode;
 
   return {
     primary,
-    primaryInk: toHex(ensureContrast(primaryRgb, surfaceRgb, 4.5)),
-    onPrimary: contrast(primaryRgb, white) >= contrast(primaryRgb, ink) ? "#FFFFFF" : toHex(ink),
+    primaryInk: toHex(ensureContrast(primaryRgb, parseHex(surface)!, 4.5)),
+    onPrimary: readableOn(primaryRgb),
     background: pick(theme?.background, DEFAULT_THEME.background),
     surface,
     text: pick(theme?.text, DEFAULT_THEME.text),
     mutedText: pick(theme?.mutedText, DEFAULT_THEME.mutedText),
     fontStyle: theme?.fontStyle === "classic" ? "classic" : "modern",
+    defaultMode: mode === "dark" || mode === "system" ? mode : DEFAULT_THEME.defaultMode,
+    dark: {
+      brand: toHex(nightBrand),
+      brandInk: toHex(ensureContrast(primaryRgb, nightSurface, 4.5)),
+      onBrand: readableOn(nightBrand),
+      canvas: NIGHT.background,
+      surface: NIGHT.surface,
+      ink: NIGHT.text,
+      muted: NIGHT.mutedText,
+    },
   };
 }
 
-/** CSS custom properties consumed by globals.css / Tailwind tokens. */
-export function themeToCssVars(theme: ResolvedTheme): Record<string, string> {
+export function dayPalette(theme: ResolvedTheme): Palette {
   return {
-    "--brand": theme.primary,
-    "--brand-ink": theme.primaryInk,
-    "--on-brand": theme.onPrimary,
-    "--canvas": theme.background,
-    "--surface": theme.surface,
-    "--ink": theme.text,
-    "--muted": theme.mutedText,
+    brand: theme.primary,
+    brandInk: theme.primaryInk,
+    onBrand: theme.onPrimary,
+    canvas: theme.background,
+    surface: theme.surface,
+    ink: theme.text,
+    muted: theme.mutedText,
   };
+}
+
+const paletteVars = (p: Palette) =>
+  `--brand:${p.brand};--brand-ink:${p.brandInk};--on-brand:${p.onBrand};--canvas:${p.canvas};--surface:${p.surface};--ink:${p.ink};--muted:${p.muted};`;
+
+/** Stylesheet with the day palette on :root and the night palette under [data-mode="dark"]. */
+export function themeToCss(theme: ResolvedTheme): string {
+  return (
+    // `html:root` outranks the fallback `:root` tokens in globals.css regardless of load order.
+    `html:root{${paletteVars(dayPalette(theme))}color-scheme:light}` +
+    `html:root[data-mode="dark"]{${paletteVars(theme.dark)}color-scheme:dark}`
+  );
+}
+
+/** localStorage key that remembers a visitor's Day/Night choice. */
+export const MODE_STORAGE_KEY = "vcard-color-mode";
+
+/**
+ * Inline script that applies the saved (or default) mode before the first
+ * paint, so visitors never see a flash of the wrong colours.
+ */
+export function modeBootScript(theme: ResolvedTheme): string {
+  const config = JSON.stringify({
+    key: MODE_STORAGE_KEY,
+    fallback: theme.defaultMode,
+    colors: { light: theme.surface, dark: theme.dark.surface },
+  });
+  return `(function(c){var m;try{m=localStorage.getItem(c.key)}catch(e){}if(m!=="light"&&m!=="dark"){m=c.fallback==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):c.fallback}var d=document.documentElement;d.setAttribute("data-mode",m);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute("content",c.colors[m])})(${config})`;
 }

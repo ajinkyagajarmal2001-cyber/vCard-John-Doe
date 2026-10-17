@@ -31,11 +31,11 @@ function Field({ label, optional, error, ...input }: InputHTMLAttributes<HTMLInp
         id={id}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
-        className="h-12 w-full rounded-xl border border-line-strong bg-surface px-4 text-[16px] text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none focus-visible:outline-none focus:ring-3 focus:ring-brand/15 aria-invalid:border-red-600"
+        className="h-12 w-full rounded-xl border border-line-strong bg-surface px-4 text-[16px] text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none focus-visible:outline-none focus:ring-3 focus:ring-brand/15 aria-invalid:border-red-600 dark:aria-invalid:border-red-400"
         {...input}
       />
       {error && (
-        <p id={errorId} className="mt-1.5 text-xs text-red-700">
+        <p id={errorId} className="mt-1.5 text-xs text-red-700 dark:text-red-300">
           {error}
         </p>
       )}
